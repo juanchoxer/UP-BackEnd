@@ -2,10 +2,15 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
 const pelucheSchema = new Schema({
-    nombre:{
+    modelo:{
         type: String,
-        required: true,
-        index: {unique: true, dropDups: true}
+        required: true
+         // como hacer que el indice combine dos campos?
+    },
+    color:{
+        type: String,
+        required: true
+        // como hacer que el indice combine dos campos?
     }
 })
 

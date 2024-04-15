@@ -3,20 +3,19 @@ const Schema = mongoose.Schema;
 const pedidoSchema = new Schema({
 
 	userId: {
-		type: String,
+		type: Schema.Types.ObjectId,
+        ref: 'Usuario',
 		required: true,
 	},
 	peluche: {
-		type: String,
-		required: true
-	},
-	color: {
-		type: String,
-		required: true
-	},
+        type: Schema.Types.ObjectId,
+        ref: 'Peluche',
+        required: true
+    },
 	accesorio: {
-		type: String,
-		required: true
+		type: Schema.Types.ObjectId,
+		ref: 'Accesorio',
+		required: false
 	},
 	isActive: {
 		type: Boolean,

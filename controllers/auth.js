@@ -2,7 +2,7 @@ require('dotenv').config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 require('mongoose');
-const User = require('../models/user');
+const User = require('../models/usuario');
 const jwt = require('jsonwebtoken');
 
 
@@ -13,12 +13,11 @@ const login = async (email, password) => {
         .update(password)
         .digest('hex');
 
-    console.log(`email ${email}  y paswword  ${cryptoPass}`)
-    const result = await User.findOne({ email: email, isActive: true, password: cryptoPass })
+    const result = await User.findOne({ email: email, esActivo: true, password: cryptoPass })
 
+    console.log(`resultado del findOut con email y clave: ${result}`)
     if (result) {
-        jwt.sign('payload',JWT_SECRET_KEY,'options');
-        const token = jwt.sign({ foo: 'bar' }, JWT_SECRET_KEY);
+        const token = jwt.sign({ userId: result._id },JWT_SECRET_KEY, { expiresIn: '1h' });
         return token;
     }
     return null;

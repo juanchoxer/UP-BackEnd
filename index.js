@@ -12,12 +12,11 @@ const uri = process.env.ConnectionString;
 
 const PelucheController = require('./controllers/peluche');
 const AccesorioController = require('./controllers/accesorio');
-const ColorController = require('./controllers/color');
-const UserController = require('./controllers/user');
+const UsuarioController = require('./controllers/usuario');
 const AuthController = require('./controllers/auth');
 const PedidoController = require('./controllers/pedido');
 
-const Middleware = require('./middleware/auth-middleware');
+const Middleware = require('./middleware/auth');
 
 
 mongoose
@@ -44,18 +43,6 @@ app.get("/peluches", async (req, res) => {
     }
 })
 
-app.get("/colores", async (req, res) => {
-    let limit = req.query.limit;
-    let offset = req.query.offset;
-
-    try {
-        const results = await PelucheController.getAllColores(limit, offset);
-        res.status(200).json(results);
-
-    } catch (error) {
-        res.status(500).send("Error. Intente mas tarde.")
-    }
-})
 
 app.get("/accesorios", async (req, res) => {
     let limit = req.query.limit;
@@ -81,12 +68,11 @@ app.get("/accesorios", async (req, res) => {
 //     }
 // });
 
-app.get("/pedidos", async (req, res) => {
+app.get("/pedidos", Middleware.verify, async (req, res) => {
     let limit = req.query.limit;
     let offset = req.query.offset;
-
     try {
-        const results = await PelucheController.getAllPedidos(limit, offset);
+        const results = await PedidoController.getAllPedidos(limit, offset);
         res.status(200).json(results);
 
     } catch (error) {
@@ -105,28 +91,16 @@ app.get("/pedidos/:id", (req, res) => { // ejemplo de getById
 //#region POST endpoints
 
 app.post("/peluches", async (req, res) => {
-    let nombre = req.body.nombre;
+    let modelo = req.body.modelo;
+    let color = req.body.color;
     try {
-        const result = await PelucheController.addPeluche(nombre);
+        const result = await PelucheController.addPeluche(modelo, color);
         if (result) {
             res.status(201).send("Peluche creado correctamente"); // 201
         }
     } catch (error) {
         console.log(`Error al crear el peluche. Error: ${error}`)
         res.status(500).send("Error al crear el peluche."); //500
-    }
-});
-
-app.post("/colores", async (req, res) => {
-    let nombre = req.body.nombre;
-    try {
-        const result = await ColorController.addColor(nombre);
-        if (result) {
-            res.status(201).send("Color creado correctamente"); // 201
-        }
-    } catch (error) {
-        console.log(`Error al crear el color. Error: ${error}`)
-        res.status(500).send("Error al crear el color."); //500
     }
 });
 
@@ -143,11 +117,11 @@ app.post("/accesorios", async (req, res) => {
     }
 });
 
-app.post("/users", async (req, res) => {
+app.post("/usuarios", async (req, res) => {
     let email = req.body.email;
     let password = req.body.password;
     try {
-        const result = await UserController.addUser(email, password);
+        const result = await UsuarioController.addUsuario(email, password);
         if (result) {
             res.status(201).send("Usuario creado correctamente"); // 201
         }
@@ -176,11 +150,20 @@ app.post("/auth/login", async (req, res) => {
     }
 })
 
-app.post("/pedidos", (req, res) => { // ejemplo de post
-    let datos = req.body;
-    console.log(datos);
-    // Crear pedido en base al request
-    res.json({ 'respuesta': 'Pedido creado' })
+app.post("/pedidos", Middleware.verify, async (req, res) => {
+    let peluche = req.body.peluche;
+    let accesorio = req.body.accesorio;
+    let userId = req.token.userId;
+    //let userId = mongoose.Types.ObjectId(req.token.userId);
+    try {
+        const result = await PedidoController.addPedido(userId, peluche, accesorio);
+        if (result) {
+            res.status(201).send("Pedido creado correctamente"); // 201
+        }
+    } catch (error) {
+        console.log(`Error al crear el pedido. Error: ${error}`)
+        res.status(500).send("Error al crear el pedido."); //500
+    }
 })
 
 
