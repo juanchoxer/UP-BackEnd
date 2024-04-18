@@ -1,12 +1,10 @@
 require('mongoose');
 const Peluche = require('../models/peluche');
 
-const addPeluche = async (modelo, color) => {  
-    console.log(`Intentando crear peluche con modelo ${modelo} y color ${color}`)
+const addPeluche = async (modelo) => { 
     const peluche = new Peluche(
         {              
-            modelo: modelo,
-            color: color
+            modelo: modelo
         }
     );
 

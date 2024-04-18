@@ -4,7 +4,8 @@ const usuarioSchema = new Schema({
 
     email:{
         type: String,
-        required: true
+        required: true,
+        index: {unique: true, dropDups: true}
     },
     password:{
         type: String,
@@ -14,13 +15,23 @@ const usuarioSchema = new Schema({
         type: Boolean,
         required: true
     },
-    pedidos:{
-		type: Array,
-		required:false,
-		//default: ['user']
-	}
+    pedidos: [{ 
+        modelo:{
+            type: String,
+            required: true
+        },
+        color:{
+            type: String,
+            required: true
+        },
+        accesorio: {
+            type: String,
+            required: true
+        }
+    }]
 
 })
 
 const Usuario = mongoose.model('usuario', usuarioSchema);
+
 module.exports = Usuario;

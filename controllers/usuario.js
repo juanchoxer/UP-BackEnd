@@ -1,14 +1,15 @@
 require('mongoose');
 const Usuario = require('../models/usuario');
+const Peluche = require('../models/peluche');
+const Color = require('../models/color');
+const Ranking = require('../models/ranking');
+const Accesorio = require('../models/accesorio');
 
 
 const addUsuario = async (email, password) => {
     let existUser = await Usuario.findOne({ email: email });
     if (!existUser) {
-        const cryptoPass = require('crypto')
-            .createHash('sha256')
-            .update(password)
-            .digest('hex');
+        const cryptoPass = require('crypto').createHash('sha256').update(password).digest('hex');
 
         const usuario = new Usuario(
             {
@@ -26,31 +27,49 @@ const addUsuario = async (email, password) => {
     }
 }
 
-// const getAllUsers = async (limit, offset) => {
-//     const users = await Usuario.find({}).limit(limit).skip(offset);
-//     return users; // verificar que no devuelva los passwords
-// }
+// PROBAR EL RANKING!!!! LO ESCRIBIR PERO NO LO PROBEEEE
+const addPedido = async (userId, pedido) => {
+    let existePeluche = await Peluche.findOne({ modelo: pedido.modelo });
+    let existeColor = await Color.findOne({ nombre: pedido.color });
+    let existeAccesorio = await Accesorio.findOne({ nombre: pedido.accesorio });
 
-// const getUser = async (id) => {
-//     const user = await Usuario.findById(id);
-//     return user;
-// }
+    if (existePeluche && existeColor && existeAccesorio) {
+        let dbUsuario = await Usuario.findByIdAndUpdate( userId, { $push: { pedidos: pedido } }, { new: true, runValidators: true });
+        
+        let existeRanking = await Ranking.findOne({ modelo: pedido.modelo });
+        if (existeRanking) {
+            await existeRanking.update({ $push: { cuenta: cuenta++ } }, { new: true, runValidators: true });
+        } else {
+            const ranking = new Ranking(
+                {
+                    modelo: pedido.modelo,
+                    esActivo: true,
+                    cuenta: 1
+                }
+            );
 
-// const editUser = async (user) => {
-//     const result = await Usuario.findByIdAndUpdate(user._id, user, { new: true });
-//     return result;
-// }
+            let dbRanking = await ranking.save();
+            console.log(dbRanking);
+        }
 
-// const editRoles = async (roles, id) => {
-//     const result = await Usuario.findByIdAndUpdate(id, { $set: { roles: roles } }, { new: true });
-//     return result;
-// }
 
-// const deleteUser = async (id) => {
+        return { dbUsuario, dbRanking };
+    } else {
+        console.log(`existePeluche: ${existePeluche} - existeColor: ${existeColor} - existeAccesorio: ${existeAccesorio}`)
+        return false;
+    }
+}
 
-//     const result = await Usuario.findByIdAndDelete(id);
+const removePedido = async (userId, pedidoId) => {
+    let dbUsuario = await Usuario.findById(userId);
+    dbUsuario.pedidos.id(pedidoId).deleteOne();
+    return dbUsuario.save();
+}
 
-//     return result;
-// }
+const getPedidosByUserId = async (userId, limit, offset) => {
+    let pedidos = await Usuario.findById(userId, 'pedidos').limit(limit).skip(offset);
+    return pedidos;
+}
 
-module.exports = { addUsuario }
+
+module.exports = { addUsuario, addPedido, removePedido, getPedidosByUserId };
