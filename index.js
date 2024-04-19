@@ -15,6 +15,7 @@ const PelucheController = require('./controllers/peluche');
 const AccesorioController = require('./controllers/accesorio');
 const UsuarioController = require('./controllers/usuario');
 const AuthController = require('./controllers/auth');
+const RankingController = require('./controllers/ranking');
 
 const Middleware = require('./middleware/auth');
 
@@ -28,7 +29,17 @@ mongoose
 
 
 
-//#region GET endpoints
+//#region GET  publicos
+
+app.get("/ranking", async (req, res) => {
+    try {
+        const results = await RankingController.getMasElegidos();
+        res.status(200).json(results);
+    } catch (error) {
+        console.log(`error: ${error}`);
+        res.status(500).send("Error. Intente mas tarde.")
+    }
+})
 
 app.get("/peluches", async (req, res) => {
     let limit = req.query.limit;
@@ -42,13 +53,12 @@ app.get("/peluches", async (req, res) => {
     }
 })
 
-
 app.get("/colores", async (req, res) => {
     let limit = req.query.limit;
     let offset = req.query.offset;
 
     try {
-        const results = await PelucheController.getAllColores(limit, offset);
+        const results = await ColorController.getAllColores(limit, offset);
         res.status(200).json(results);
 
     } catch (error) {
@@ -68,6 +78,10 @@ app.get("/accesorios", async (req, res) => {
     }
 })
 
+//#endregion
+
+//#region GET  privados
+
 app.get("/pedidos", Middleware.verify, async (req, res) => {
     let limit = req.query.limit;
     let offset = req.query.offset;
@@ -83,7 +97,7 @@ app.get("/pedidos", Middleware.verify, async (req, res) => {
 
 //#endregion
 
-//#region POST endpoints
+//#region POST publicos
 
 app.post("/auth/login", async (req, res) => {
     const email = req.body.email;
@@ -100,6 +114,10 @@ app.post("/auth/login", async (req, res) => {
         res.status(500).send("Error");
     }
 })
+
+//#endregion
+
+//#region POST privados
 
 app.post("/pedidos", Middleware.verify, async (req, res) => {
     let modelo = req.body.modelo.toLowerCase();
@@ -122,7 +140,7 @@ app.post("/pedidos", Middleware.verify, async (req, res) => {
 
 //#endregion
 
-//#region DELETE endpoints
+//#region DELETE privados
 
 app.delete("/pedidos", Middleware.verify, async (req, res) => {
     let pedidoId = req.body.pedidoId;
@@ -142,67 +160,64 @@ app.delete("/pedidos", Middleware.verify, async (req, res) => {
 
 //#endregion
 
+//#region POST no accesibles - Comentados porque no quiero que sean accesibles incluso con un token
 
-//#region POST no accesibles
+// app.post("/usuarios", async (req, res) => {
+//     let email = req.body.email.toLowerCase();
+//     let password = req.body.password;
+//     try {
+//         const result = await UsuarioController.addUsuario(email, password);
+//         if (result) {
+//             res.status(201).send(result);
+//         }
+//         else {
+//             res.status(409).send("El usuario ya existe");
+//         }
+//     } catch (error) {
+//         console.log(`Error al crear el usuario. Error: ${error}`)
+//         res.status(500).send("Error al crear el usuario.");
+//     }
+// });
 
-// Comentados porque no quiero que sean accesibles incluso con un token
+// app.post("/peluches", async (req, res) => {
+//     let modelo = req.body.modelo.toLowerCase();
+//     try {
+//         const result = await PelucheController.addPeluche(modelo);
+//         if (result) {
+//             res.status(201).send("Peluche creado correctamente");
+//         }
+//     } catch (error) {
+//         console.log(`Error al crear el peluche. Error: ${error}`)
+//         res.status(500).send("Error al crear el peluche.");
+//     }
+// });
 
-app.post("/usuarios", async (req, res) => {
-    let email = req.body.email.toLowerCase();
-    let password = req.body.password;
-    try {
-        const result = await UsuarioController.addUsuario(email, password);
-        if (result) {
-            res.status(201).send(result);
-        }
-        else {
-            res.status(409).send("El usuario ya existe");
-        }
-    } catch (error) {
-        console.log(`Error al crear el usuario. Error: ${error}`)
-        res.status(500).send("Error al crear el usuario.");
-    }
-});
-
-app.post("/peluches", async (req, res) => {
-    let modelo = req.body.modelo.toLowerCase();
-    try {
-        const result = await PelucheController.addPeluche(modelo);
-        if (result) {
-            res.status(201).send("Peluche creado correctamente");
-        }
-    } catch (error) {
-        console.log(`Error al crear el peluche. Error: ${error}`)
-        res.status(500).send("Error al crear el peluche.");
-    }
-});
-
-app.post("/accesorios", async (req, res) => {
-    let nombre = req.body.nombre.toLowerCase();
-    try {
-        const result = await AccesorioController.addAccesorio(nombre);
-        if (result) {
-            res.status(201).send(result);
-        }
-    } catch (error) {
-        console.log(`Error al crear el accesorio. Error: ${error}`)
-        res.status(500).send("Error al crear el accesorio.");
-    }
-});
+// app.post("/accesorios", async (req, res) => {
+//     let nombre = req.body.nombre.toLowerCase();
+//     try {
+//         const result = await AccesorioController.addAccesorio(nombre);
+//         if (result) {
+//             res.status(201).send(result);
+//         }
+//     } catch (error) {
+//         console.log(`Error al crear el accesorio. Error: ${error}`)
+//         res.status(500).send("Error al crear el accesorio.");
+//     }
+// });
 
 
-app.post("/colores", async (req, res) => {
-    let nombre = req.body.nombre.toLowerCase();
-    try {
-        const result = await ColorController.addColor(nombre);
-        if (result) {
-            res.status(201).send(result);
-        }
-    } catch (error) {
-        console.log(`Error al crear el color. Error: ${error}`)
-        res.status(500).send("Error al crear el color.");
-    }
-});
+// app.post("/colores", async (req, res) => {
+//     let nombre = req.body.nombre.toLowerCase();
+//     try {
+//         const result = await ColorController.addColor(nombre);
+//         if (result) {
+//             res.status(201).send(result);
+//         }
+//     } catch (error) {
+//         console.log(`Error al crear el color. Error: ${error}`)
+//         res.status(500).send("Error al crear el color.");
+//     }
+// });
 
 //#endregion
 
