@@ -11,16 +11,12 @@ const rankingSchema = new Schema({
         type: Boolean,
         required: true
     },
-    cuenta:{
-        type: Long,
-        required: true
-    }
-    // pedidos: [{ 
-    //     pedidoId:{
-    //         type: String,
-    //         required: true
-    //     }
-    // }]
+    pedidos: [{ 
+        pedidoId:{
+            type: String,
+            required: true
+        }
+    }]
 
 })
 

@@ -9,7 +9,6 @@ const addPeluche = async (modelo) => {
     );
 
     let dbPeluche = await peluche.save(); 
-    console.log("peluche nuevo");
     console.log(dbPeluche);
     return { dbPeluche }; 
 }   

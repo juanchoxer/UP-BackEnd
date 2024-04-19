@@ -102,103 +102,107 @@ app.post("/auth/login", async (req, res) => {
 })
 
 app.post("/pedidos", Middleware.verify, async (req, res) => {
-    let pedido = req.body;
+    let modelo = req.body.modelo.toLowerCase();
+    let color = req.body.color.toLowerCase();
+    let accesorio = req.body.accesorio.toLowerCase();
+    let pedido = { modelo: modelo, color: color, accesorio: accesorio };
     let userId = req.token.userId;
-    console.log(`userId: ${userId}`)
     try {
         const result = await UsuarioController.addPedido(userId, pedido);
         if (result) {
-            res.status(201).send(result); // 201
+            res.status(201).send(result);
         } else {
             res.status(422).send("Datos inválidos.")
         }
     } catch (error) {
         console.log(`Error al crear el pedido. Error: ${error}`)
-        res.status(500).send("Error al crear el pedido."); //500
+        res.status(500).send("Error al crear el pedido.");
     }
 })
 
 //#endregion
 
 //#region DELETE endpoints
+
 app.delete("/pedidos", Middleware.verify, async (req, res) => {
     let pedidoId = req.body.pedidoId;
     let userId = req.token.userId;
     try {
         const result = await UsuarioController.removePedido(userId, pedidoId);
         if (result) {
-            res.status(201).send(result); // 201
+            res.status(200).send(result); 
         } else {
             res.status(422).send("Datos inválidos.")
         }
     } catch (error) {
         console.log(`Error al eliminar el pedido. Error: ${error}`)
-        res.status(500).send("Error al eliminar el pedido."); //500
+        res.status(500).send("Error al eliminar el pedido."); 
     }
 })
 
+//#endregion
 
 
 //#region POST no accesibles
 
 // Comentados porque no quiero que sean accesibles incluso con un token
 
-// app.post("/usuarios", async (req, res) => {
-//     let email = req.body.email;
-//     let password = req.body.password;
-//     try {
-//         const result = await UsuarioController.addUsuario(email, password);
-//         if (result) {
-//             res.status(201).send(result); // 201
-//         }
-//         else {
-//             res.status(409).send("El usuario ya existe"); // 409
-//         }
-//     } catch (error) {
-//         console.log(`Error al crear el usuario. Error: ${error}`)
-//         res.status(500).send("Error al crear el usuario."); //500
-//     }
-// });
+app.post("/usuarios", async (req, res) => {
+    let email = req.body.email.toLowerCase();
+    let password = req.body.password;
+    try {
+        const result = await UsuarioController.addUsuario(email, password);
+        if (result) {
+            res.status(201).send(result);
+        }
+        else {
+            res.status(409).send("El usuario ya existe");
+        }
+    } catch (error) {
+        console.log(`Error al crear el usuario. Error: ${error}`)
+        res.status(500).send("Error al crear el usuario.");
+    }
+});
 
-// app.post("/peluches", async (req, res) => {
-//     let modelo = req.body.modelo;
-//     try {
-//         const result = await PelucheController.addPeluche(modelo);
-//         if (result) {
-//             res.status(201).send("Peluche creado correctamente"); // 201
-//         }
-//     } catch (error) {
-//         console.log(`Error al crear el peluche. Error: ${error}`)
-//         res.status(500).send("Error al crear el peluche."); //500
-//     }
-// });
+app.post("/peluches", async (req, res) => {
+    let modelo = req.body.modelo.toLowerCase();
+    try {
+        const result = await PelucheController.addPeluche(modelo);
+        if (result) {
+            res.status(201).send("Peluche creado correctamente");
+        }
+    } catch (error) {
+        console.log(`Error al crear el peluche. Error: ${error}`)
+        res.status(500).send("Error al crear el peluche.");
+    }
+});
 
-// app.post("/accesorios", async (req, res) => {
-//     let nombre = req.body.nombre;
-//     try {
-//         const result = await AccesorioController.addAccesorio(nombre);
-//         if (result) {
-//             res.status(201).send(result); // 201
-//         }
-//     } catch (error) {
-//         console.log(`Error al crear el accesorio. Error: ${error}`)
-//         res.status(500).send("Error al crear el accesorio."); //500
-//     }
-// });
+app.post("/accesorios", async (req, res) => {
+    let nombre = req.body.nombre.toLowerCase();
+    try {
+        const result = await AccesorioController.addAccesorio(nombre);
+        if (result) {
+            res.status(201).send(result);
+        }
+    } catch (error) {
+        console.log(`Error al crear el accesorio. Error: ${error}`)
+        res.status(500).send("Error al crear el accesorio.");
+    }
+});
 
 
-// app.post("/colores", async (req, res) => {
-//     let nombre = req.body.nombre;
-//     try {
-//         const result = await ColorController.addColor(nombre);
-//         if (result) {
-//             res.status(201).send(result); // 201
-//         }
-//     } catch (error) {
-//         console.log(`Error al crear el color. Error: ${error}`)
-//         res.status(500).send("Error al crear el color."); //500
-//     }
-// });
+app.post("/colores", async (req, res) => {
+    let nombre = req.body.nombre.toLowerCase();
+    try {
+        const result = await ColorController.addColor(nombre);
+        if (result) {
+            res.status(201).send(result);
+        }
+    } catch (error) {
+        console.log(`Error al crear el color. Error: ${error}`)
+        res.status(500).send("Error al crear el color.");
+    }
+});
 
 //#endregion
 

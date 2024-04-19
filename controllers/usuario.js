@@ -1,4 +1,4 @@
-require('mongoose');
+const mongoose = require('mongoose');
 const Usuario = require('../models/usuario');
 const Peluche = require('../models/peluche');
 const Color = require('../models/color');
@@ -27,43 +27,47 @@ const addUsuario = async (email, password) => {
     }
 }
 
-// PROBAR EL RANKING!!!! LO ESCRIBIR PERO NO LO PROBEEEE
 const addPedido = async (userId, pedido) => {
     let existePeluche = await Peluche.findOne({ modelo: pedido.modelo });
     let existeColor = await Color.findOne({ nombre: pedido.color });
     let existeAccesorio = await Accesorio.findOne({ nombre: pedido.accesorio });
 
     if (existePeluche && existeColor && existeAccesorio) {
-        let dbUsuario = await Usuario.findByIdAndUpdate( userId, { $push: { pedidos: pedido } }, { new: true, runValidators: true });
+
+        const pedidoId = new mongoose.Types.ObjectId();
+        pedido._id = pedidoId;   
+        await Usuario.findByIdAndUpdate( userId, { $push: { pedidos: pedido } }, { new: true, runValidators: true });        
         
-        let existeRanking = await Ranking.findOne({ modelo: pedido.modelo });
-        if (existeRanking) {
-            await existeRanking.update({ $push: { cuenta: cuenta++ } }, { new: true, runValidators: true });
-        } else {
-            const ranking = new Ranking(
-                {
-                    modelo: pedido.modelo,
-                    esActivo: true,
-                    cuenta: 1
-                }
-            );
+        let resultado = await Ranking.findOneAndUpdate(
+            { modelo: pedido.modelo, esActivo: true }, 
+            { $push: { pedidos: [{ pedidoId: pedido._id }] } },
+            { new: true, runValidators: true, upsert: true }
+        );
 
-            let dbRanking = await ranking.save();
-            console.log(dbRanking);
-        }
+        return pedido._id;
 
-
-        return { dbUsuario, dbRanking };
     } else {
-        console.log(`existePeluche: ${existePeluche} - existeColor: ${existeColor} - existeAccesorio: ${existeAccesorio}`)
+        console.log(`Algo no existe - existePeluche: ${existePeluche} - existeColor: ${existeColor} - existeAccesorio: ${existeAccesorio}`)
         return false;
     }
 }
 
 const removePedido = async (userId, pedidoId) => {
     let dbUsuario = await Usuario.findById(userId);
-    dbUsuario.pedidos.id(pedidoId).deleteOne();
-    return dbUsuario.save();
+
+    let dbPedido = dbUsuario.pedidos.id(pedidoId);
+    let pedidoModelo = dbPedido.modelo;
+    let rankingPedidoId = dbPedido.id;
+
+    dbPedido.deleteOne();
+
+    let dbRanking = await Ranking.findOne({ modelo: pedidoModelo });
+    let dbPedidoRanking = dbRanking.pedidos.pull({pedidoId: rankingPedidoId});
+
+    dbUsuario.save();
+    dbRanking.save();
+
+    return dbPedido;
 }
 
 const getPedidosByUserId = async (userId, limit, offset) => {

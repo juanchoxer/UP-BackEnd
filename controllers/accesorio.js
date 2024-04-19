@@ -10,7 +10,6 @@ const addAccesorio = async (nombre) => {
     );
 
     let dbAccesorio = await accesorio.save(); 
-    console.log("accesorio nuevo");
     console.log(dbAccesorio);
     return { dbAccesorio }; 
 }   
