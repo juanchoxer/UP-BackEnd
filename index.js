@@ -20,6 +20,10 @@ const RankingController = require('./controllers/ranking');
 const Middleware = require('./middleware/auth');
 
 
+const cors = require ("cors"); 
+app.use(cors());
+app.options('*', cors());
+
 mongoose
     .connect(uri, {})
     .then(() => {
