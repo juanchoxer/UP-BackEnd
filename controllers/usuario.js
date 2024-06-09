@@ -71,7 +71,9 @@ const removePedido = async (userId, pedidoId) => {
 }
 
 const getPedidosByUserId = async (userId, limit, offset) => {
-    let pedidos = await Usuario.findById(userId, 'pedidos').limit(limit).skip(offset);
+    let usuario = await Usuario.findById(userId).limit(1);
+    let end = Number(limit)+Number(offset);
+    let pedidos = usuario.pedidos.slice(offset, end);
     return pedidos;
 }
 

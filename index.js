@@ -103,6 +103,23 @@ app.get("/pedidos", Middleware.verify, async (req, res) => {
 
 //#region POST publicos
 
+app.post("/usuarios", async (req, res) => {
+    let email = req.body.email.toLowerCase();
+    let password = req.body.password;
+    try {
+        const result = await UsuarioController.addUsuario(email, password);
+        if (result) {
+            res.status(201).send(result);
+        }
+        else {
+            res.status(409).send("El usuario ya existe");
+        }
+    } catch (error) {
+        console.log(`Error al crear el usuario. Error: ${error}`)
+        res.status(500).send("Error al crear el usuario.");
+    }
+});
+
 app.post("/auth/login", async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
@@ -142,6 +159,7 @@ app.post("/pedidos", Middleware.verify, async (req, res) => {
     }
 })
 
+
 //#endregion
 
 //#region DELETE privados
@@ -164,24 +182,9 @@ app.delete("/pedidos", Middleware.verify, async (req, res) => {
 
 //#endregion
 
-//#region POST no accesibles - Comentados porque no quiero que sean accesibles incluso con un token
 
-// app.post("/usuarios", async (req, res) => {
-//     let email = req.body.email.toLowerCase();
-//     let password = req.body.password;
-//     try {
-//         const result = await UsuarioController.addUsuario(email, password);
-//         if (result) {
-//             res.status(201).send(result);
-//         }
-//         else {
-//             res.status(409).send("El usuario ya existe");
-//         }
-//     } catch (error) {
-//         console.log(`Error al crear el usuario. Error: ${error}`)
-//         res.status(500).send("Error al crear el usuario.");
-//     }
-// });
+
+//#region POST no accesibles - Comentados porque no quiero que sean accesibles incluso con un token
 
 // app.post("/peluches", async (req, res) => {
 //     let modelo = req.body.modelo.toLowerCase();
